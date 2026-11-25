@@ -13,3 +13,5 @@ test('large durations and zero stay readable',()=>{assert.equal(duration(0),'0 s
 test('query length is bounded',()=>assert.throws(()=>calculate('a'.repeat(301))));
 
 test('milliwatt and megawatt symbols keep their SI case',()=>{assert.equal(convert(1,'mW','W').value,.001);assert.equal(convert(1,'MW','W').value,1000000);assert.throws(()=>convert(1,'mw','W'),/ambiguous/);});
+
+test('duration rounds readable seconds without losing calculation precision',()=>{const r=calculate('100 GB at 3 Gbps');assert.equal(r.headline,'4 minutes, 26.7 seconds');near(r.value,800/3);assert.equal(duration(59.99),'1 minute');assert.equal(duration(86399.99),'1 day');assert.equal(duration(1.04),'1 second');});
