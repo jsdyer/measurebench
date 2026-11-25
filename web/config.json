@@ -1,0 +1,15 @@
+{
+  "api_base": "https://coolcode-visitor-api.jeffdyer.workers.dev",
+  "wolfram_path": "/api/measurebench/answer",
+  "examples": [
+    {"label":"Back up 1 TB","query":"1 TB at 100 Mbps"},
+    {"label":"3 Gbps fibre","query":"100 GB at 3 Gbps"},
+    {"label":"Storage labels","query":"1 TB to GiB"},
+    {"label":"Heater energy","query":"1500 W for 8 hours at 0.15 CAD/kWh"},
+    {"label":"Canadian road trip","query":"250 miles to km"},
+    {"label":"Balcony area","query":"120 square feet to m2"},
+    {"label":"Unusual units","query":"100 smoots to m"},
+    {"label":"Recipe volume","query":"2 US cups to mL"},
+    {"label":"Temperature","query":"72 F to C"}
+  ]
+}

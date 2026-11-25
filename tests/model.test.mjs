@@ -1,21 +1,13 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { cleanLines } from '../web/model.mjs';
-test('trims, removes blanks and preserves first-seen order', () => {
-  assert.deepEqual(cleanLines('  Halifax\nLangley\nHalifax\n\nVancouver  '), {
-    text: 'Halifax\nLangley\nVancouver', count: 3, removed: 1,
-  });
-});
-test('supports Windows and old Mac line endings', () => {
-  assert.equal(cleanLines('a\r\nb\ra').text, 'a\nb');
-});
-test('empty text and whitespace produce an empty result', () => {
-  assert.deepEqual(cleanLines(' \n\t'), { text: '', count: 0, removed: 0 });
-});
-test('preserves case and Unicode', () => {
-  assert.equal(cleanLines('Québec\nquébec\n東京\nQuébec').text, 'Québec\nquébec\n東京');
-});
-test('treats markup as ordinary text', () => {
-  assert.equal(cleanLines('<script>alert(1)</script>\n<script>alert(1)</script>').text, '<script>alert(1)</script>');
-});
-test('rejects non-text input', () => { assert.throws(() => cleanLines(null), TypeError); });
+import test from 'node:test';import assert from 'node:assert/strict';import {calculate,convert,transfer,energy,duration}from '../web/model.mjs';
+const near=(a,b,t=1e-8)=>assert.ok(Math.abs(a-b)<t,`${a} != ${b}`);
+test('bits and bytes produce correct ideal transfer time',()=>{assert.equal(calculate('100 GB at 100 Mbps').value,8000);assert.equal(calculate('100 GB at 100 MB/s').value,1000);});
+test('IEC storage and efficiency are independent',()=>{near(transfer('1 GiB','1 Gbps',80).value,10.73741824);near(convert(1,'TB','GiB').value,931.3225746154785);});
+test('realistic energy and cost',()=>{const r=calculate('1500 W for 8 hours at 0.15 CAD/kWh');assert.equal(r.value,12);assert.match(r.detail,/1.8 CAD/);assert.equal(energy('1 kW','30 min').value,.5);});
+test('conversions use exact international definitions',()=>{assert.equal(calculate('12 miles to km').value,19.312128);near(convert(2,'US cups','mL').value,473.176473);assert.equal(convert(1,'imperial gallon','L').value,4.54609);near(convert(1,'acre','m2').value,4046.8564224);});
+test('temperature offsets and absolute zero',()=>{near(convert(32,'F','C').value,0);near(convert(-40,'C','F').value,-40);assert.throws(()=>convert(-274,'C','K'),/absolute zero/);});
+test('arbitrary valid input beyond examples',()=>{near(calculate('327.5 nautical miles to km').value,606.53);near(calculate('55 hands to cm').value,558.8);});
+test('incompatible and ambiguous units fail visibly',()=>{assert.throws(()=>calculate('2 cups to mL'),/ambiguous/);assert.throws(()=>calculate('1 kg to L'),/Cannot convert/);assert.throws(()=>calculate('1 MB to Mb/s'),/Cannot convert/);});
+test('reject nonfinite, negative transfer and invalid efficiency',()=>{assert.throws(()=>transfer('1 GB','0 Mbps'));assert.throws(()=>transfer('-1 GB','10 Mbps'));assert.throws(()=>transfer('1 GB','1 Mbps',101));assert.throws(()=>calculate('1e999 kg to lb'));assert.throws(()=>energy('1 W','-2 h'));});
+test('no expression or HTML execution grammar',()=>{assert.throws(()=>calculate('alert(1)'));assert.throws(()=>calculate('<img src=x onerror=alert(1)>'));assert.throws(()=>calculate('1+2 to m'));});
+test('large durations and zero stay readable',()=>{assert.equal(duration(0),'0 seconds');assert.equal(duration(90061),'1 day, 1 hour, 1 minute, 1 second');assert.equal(calculate('0 GB at 100 Mbps').value,0);});
+test('query length is bounded',()=>assert.throws(()=>calculate('a'.repeat(301))));

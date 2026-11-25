@@ -1,37 +1,8 @@
-import { cleanLines } from './model.mjs';
-const input = document.querySelector('#input');
-const output = document.querySelector('#output');
-const status = document.querySelector('#status');
-const copy = document.querySelector('#copy');
-function update() {
-  const result = cleanLines(input.value);
-  output.value = result.text;
-  status.textContent = `${result.count} unique ${result.count === 1 ? 'line' : 'lines'}; ${result.removed} ${result.removed === 1 ? 'duplicate' : 'duplicates'} removed.`;
-  copy.disabled = result.count === 0;
-}
-input.addEventListener('input', update);
-document.querySelector('#sample').addEventListener('click', () => {
-  input.value = '  Halifax\nLangley\nHalifax\n\nVancouver  ';
-  update();
-});
-document.querySelector('#clear').addEventListener('click', () => {
-  input.value = '';
-  update();
-  input.focus();
-});
-if (navigator.clipboard && window.isSecureContext) {
-  copy.hidden = false;
-  copy.disabled = true;
-  copy.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(output.value);
-      status.textContent = 'Result copied.';
-    } catch {
-      output.focus();
-      output.select();
-      status.textContent = 'Copy was unavailable. The result is selected so you can copy it manually.';
-    }
-  });
-}
-// Namespace future preference storage as coolcode:<tool-id>:<key>.
-// Do not persist pasted text or uploads by default.
+import {calculate,UNITS} from './model.mjs';
+const $=id=>document.getElementById(id);let config={},lastResult='',remoteRequest=null;
+function render(){const box=$('result');box.replaceChildren();box.classList.remove('error');$('remote-answer').textContent='';$('remote-status').textContent='';remoteRequest?.abort();try{const r=calculate($('query').value,{efficiency:Number($('efficiency').value)});const h=document.createElement('h2');h.textContent=r.headline;const p=document.createElement('p');p.textContent=r.detail;const formula=document.createElement('code');formula.textContent=r.formula;const ul=document.createElement('ul');for(const text of r.notes){const li=document.createElement('li');li.textContent=text;ul.append(li);}box.append(h,p,formula,ul);lastResult=[r.detail,r.headline,r.formula,...r.notes].join('\n');$('copy').disabled=false;}catch(error){box.classList.add('error');box.textContent=error.message;lastResult='';$('copy').disabled=true;}}
+$('calculator').addEventListener('submit',e=>{e.preventDefault();render();});$('efficiency').addEventListener('change',render);$('query').addEventListener('input',()=>{remoteRequest?.abort();$('remote-answer').textContent='';$('remote-status').textContent='';});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(lastResult);$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy calculation',1800);}catch{$('copy').textContent='Copy unavailable — select the answer';}});
+$('wolfram').addEventListener('click',async()=>{const query=$('query').value.trim();if(!query||query.length>300){$('remote-status').textContent='Enter a question of up to 300 characters first.';return;}remoteRequest?.abort();const request=new AbortController();remoteRequest=request;$('wolfram').disabled=true;$('remote-answer').textContent='';$('remote-status').textContent='Asking Wolfram through the CoolCode proxy…';const timeout=setTimeout(()=>request.abort(),20000);try{if(!config.api_base)throw new Error('The optional answer service is not configured. Local calculations still work.');const response=await fetch(config.api_base+config.wolfram_path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query}),signal:request.signal,credentials:'omit',referrerPolicy:'no-referrer'});const body=await response.json();if(!response.ok)throw new Error(body.error?.message||'The optional answer service is unavailable or its shared quota has been reached.');if(typeof body.answer!=='string'||!body.answer.trim())throw new Error('No short answer was returned. Try a more specific question.');if(remoteRequest!==request||$('query').value.trim()!==query)return;$('remote-answer').textContent=body.answer;$('remote-status').textContent=`Wolfram Alpha · ${body.cached?'cached answer':'external answer'} · Check units and assumptions before using it.`;}catch(e){if(remoteRequest===request)$('remote-status').textContent=e.name==='AbortError'?'The request was cancelled or timed out. Local calculations still work.':e.message;}finally{clearTimeout(timeout);if(remoteRequest===request){$('wolfram').disabled=false;remoteRequest=null;}}});
+const groups=new Map();for(const [unit,group] of UNITS){if(!groups.has(group))groups.set(group,[]);groups.get(group).push(unit);}groups.set('storage',['b','B','kB','MB','GB','TB','PB','KiB','MiB','GiB','TiB','PiB','and corresponding bits']);groups.set('data rates',['Mbps','Gbps','MB/s','MiB/s','and other storage units per second']);groups.set('temperature',['C','F','K']);for(const [name,units]of groups){const p=document.createElement('p');const b=document.createElement('strong');b.textContent=name+': ';p.append(b,document.createTextNode(units.join(', ')));$('units').append(p);}
+try{const response=await fetch('./config.json');if(!response.ok)throw new Error('config');config=await response.json();for(const example of config.examples||[]){if(typeof example.query!=='string'||typeof example.label!=='string')continue;const button=document.createElement('button');button.type='button';button.textContent=example.label;button.addEventListener('click',()=>{$('query').value=example.query;render();});$('examples').append(button);}}catch{$('remote-status').textContent='Example settings could not load. The local calculator still works.';}render();
