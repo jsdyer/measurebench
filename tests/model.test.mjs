@@ -11,3 +11,5 @@ test('reject nonfinite, negative transfer and invalid efficiency',()=>{assert.th
 test('no expression or HTML execution grammar',()=>{assert.throws(()=>calculate('alert(1)'));assert.throws(()=>calculate('<img src=x onerror=alert(1)>'));assert.throws(()=>calculate('1+2 to m'));});
 test('large durations and zero stay readable',()=>{assert.equal(duration(0),'0 seconds');assert.equal(duration(90061),'1 day, 1 hour, 1 minute, 1 second');assert.equal(calculate('0 GB at 100 Mbps').value,0);});
 test('query length is bounded',()=>assert.throws(()=>calculate('a'.repeat(301))));
+
+test('milliwatt and megawatt symbols keep their SI case',()=>{assert.equal(convert(1,'mW','W').value,.001);assert.equal(convert(1,'MW','W').value,1000000);assert.throws(()=>convert(1,'mw','W'),/ambiguous/);});

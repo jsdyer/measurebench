@@ -4,7 +4,7 @@ export const UNITS = [
  ['kg','mass',1,['kilogram','kilograms']],['g','mass',.001,['gram','grams']],['mg','mass',.000001,[]],['lb','mass',.45359237,['pound','pounds','lbs']],['oz','mass',.028349523125,['ounce','ounces']],['tonne','mass',1000,['tonnes','metric ton','metric tons']],['US ton','mass',907.18474,['short ton','short tons']],
  ['L','volume',1,['litre','litres','liter','liters']],['mL','volume',.001,['millilitre','millilitres','milliliter','milliliters']],['m³','volume',1000,['m3']],['US gallon','volume',3.785411784,['US gallons','US gal']],['imperial gallon','volume',4.54609,['imperial gallons','imp gal']],['US cup','volume',.2365882365,['US cups']],['metric cup','volume',.25,['metric cups']],['US fl oz','volume',.0295735295625,[]],
  ['s','time',1,['second','seconds','sec']],['min','time',60,['minute','minutes']],['h','time',3600,['hour','hours','hr']],['day','time',86400,['days']],['week','time',604800,['weeks']],
- ['W','power',1,['watt','watts']],['kW','power',1000,['kilowatt','kilowatts']],['MW','power',1e6,[]],['J','energy',1,['joule','joules']],['kJ','energy',1000,[]],['Wh','energy',3600,[]],['kWh','energy',3600000,[]],['kcal','energy',4184,['food calorie','food calories']],
+ ['mW','power',.001,['milliwatt','milliwatts']],['W','power',1,['watt','watts']],['kW','power',1000,['kilowatt','kilowatts']],['MW','power',1e6,[]],['J','energy',1,['joule','joules']],['kJ','energy',1000,[]],['Wh','energy',3600,[]],['kWh','energy',3600000,[]],['kcal','energy',4184,['food calorie','food calories']],
  ['m/s','speed',1,[]],['km/h','speed',1/3.6,['kph']],['mph','speed',.44704,[]],['knot','speed',.5144444444444445,['knots','kt']],
 ];
 const numberPattern='[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:e[+-]?\\d+)?';
@@ -24,7 +24,7 @@ function unitInfo(unit){
  if(['C','°C','celsius'].includes(unit))return {name:'°C',dimension:'temperature',factor:1,offset:273.15};
  if(['F','°F','fahrenheit'].includes(unit))return {name:'°F',dimension:'temperature',factor:5/9,offset:255.3722222222222};
  if(['K','kelvin'].includes(unit))return {name:'K',dimension:'temperature',factor:1,offset:0};
- const key=unit.toLowerCase();const row=UNITS.find(r=>r[0].toLowerCase()===key||r[3].some(a=>a.toLowerCase()===key));
+ const key=unit.toLowerCase();const exact=UNITS.find(r=>r[0]===unit);const aliases=UNITS.find(r=>r[3].some(a=>a.toLowerCase()===key));const matches=UNITS.filter(r=>r[0].toLowerCase()===key);const row=exact||aliases||(matches.length===1?matches[0]:null);
  if(!row)throw new Error(`Unknown or ambiguous unit “${unit}”. Use explicit US/imperial gallons, metric/US cups, and B for bytes or b for bits.`);
  return {name:row[0],dimension:row[1],factor:row[2]};
 }
