@@ -10,7 +10,7 @@
     "transfer",
     "energy"
   ],
-  "icon": "calculator",
+  "icon": "percent",
   "url": "/measurebench/",
   "source": "https://github.com/jsdyer/measurebench",
   "hosting": "project",
