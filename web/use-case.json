@@ -1,0 +1,5 @@
+{
+  "slug": "upload-time",
+  "title": "How Long Will a 10 GB Upload Take at 20 Mbps?",
+  "description": "A 10 GB file contains 80 billion bits in decimal units. At 20 Mbps it takes about 1 hour, 6 minutes and 40 seconds before overhead. Change the file size, upload speed or useful throughput percentage to estimate your transfer."
+}

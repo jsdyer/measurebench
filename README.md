@@ -44,3 +44,7 @@ GitHub Actions also exercises Chromium at a project subpath and a 390px viewport
 - [Wolfram Short Answers API](https://products.wolframalpha.com/short-answers-api/documentation)
 
 This calculator provides practical estimates. It does not model changing network throughput, appliance duty cycles, tiered electricity tariffs or engineering tolerances.
+
+## Ready-to-use example
+
+[How Long Will a 10 GB Upload Take at 20 Mbps?](https://coolcode.ca/measurebench/upload-time.html) opens this scenario in the same tool. A 10 GB file contains 80 billion bits in decimal units. At 20 Mbps it takes about 1 hour, 6 minutes and 40 seconds before overhead. Change the file size, upload speed or useful throughput percentage to estimate your transfer.
